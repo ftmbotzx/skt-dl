@@ -26,7 +26,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'skt-dl=skt_dl.skt_dl:main',
+            'skt-dl=skt_dl.cli:main',
         ],
     },
     classifiers=[

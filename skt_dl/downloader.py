@@ -19,6 +19,7 @@ from .utils import (
 )
 from .constants import DOWNLOAD_CHUNK_SIZE
 from .extractor import YouTubeExtractor
+from .api_extractor import YouTubeAPIExtractor
 
 logger = logging.getLogger('skt-dl.downloader')
 
@@ -28,14 +29,22 @@ class VideoDownloader:
     Class for downloading YouTube videos
     """
     
-    def __init__(self, extractor: Optional[YouTubeExtractor] = None):
+    def __init__(self, extractor=None):
         """
         Initialize the downloader
         
         Args:
-            extractor: Optional YouTubeExtractor instance to use
+            extractor: Optional extractor instance to use (YouTubeExtractor or YouTubeAPIExtractor)
         """
-        self.extractor = extractor or YouTubeExtractor()
+        if extractor is None:
+            # Try to create API extractor first, fall back to regular extractor if no API key
+            try:
+                self.extractor = YouTubeAPIExtractor()
+            except ValueError:
+                self.extractor = YouTubeExtractor()
+        else:
+            self.extractor = extractor
+            
         self.session = requests.Session()
     
     def download_video(
@@ -205,8 +214,12 @@ class VideoDownloader:
         # Filter formats to include only those with both audio and video
         combined_formats = [fmt for fmt in formats if fmt["is_audio"] and fmt["is_video"]]
         
-        # If no combined formats, return None
+        # If no combined formats, try formats with only video
         if not combined_formats:
+            video_formats = [fmt for fmt in formats if fmt["is_video"]]
+            if video_formats:
+                logger.info("No combined formats found. Using video-only format.")
+                return sorted(video_formats, key=lambda fmt: fmt.get("height", 0), reverse=True)[0]
             return None
         
         if quality == "best":
