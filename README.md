@@ -31,6 +31,8 @@ cd skt-dl
 pip install -e .
 ```
 
+For detailed instructions on building, installing, and deploying the package, see [DEPLOYMENT.md](DEPLOYMENT.md).
+
 ## Usage
 
 ### Command-line Usage

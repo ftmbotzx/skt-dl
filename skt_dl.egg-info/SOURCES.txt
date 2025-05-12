@@ -2,8 +2,10 @@ LICENSE
 MANIFEST.in
 README.md
 pyproject.toml
+setup.cfg
 setup.py
 skt_dl/__init__.py
+skt_dl/__main__.py
 skt_dl/api_extractor.py
 skt_dl/captions.py
 skt_dl/cli.py
@@ -12,6 +14,7 @@ skt_dl/constants.py
 skt_dl/downloader.py
 skt_dl/exceptions.py
 skt_dl/extractor.py
+skt_dl/py.typed
 skt_dl/search.py
 skt_dl/skt_dl.py
 skt_dl/thumbnail.py

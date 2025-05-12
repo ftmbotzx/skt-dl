@@ -31,6 +31,7 @@ Requires-Dist: werkzeug>=2.0.0
 Requires-Dist: build>=1.2.2.post1
 Requires-Dist: wheel>=0.45.1
 Requires-Dist: setuptools>=75.3.2
+Requires-Dist: pip-tools>=7.4.1
 Dynamic: author
 Dynamic: home-page
 Dynamic: license-file
@@ -68,6 +69,8 @@ git clone https://github.com/username/skt-dl.git
 cd skt-dl
 pip install -e .
 ```
+
+For detailed instructions on building, installing, and deploying the package, see [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ## Usage
 
