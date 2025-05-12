@@ -21,12 +21,18 @@ setup(
     author_email='skt-dl@example.com',
     url='https://github.com/example/skt-dl',
     packages=find_packages(),
+    include_package_data=True,
     install_requires=[
         'requests>=2.25.0',
+        'flask>=2.0.0',
+        'flask-sqlalchemy>=3.0.0',
+        'gunicorn>=20.1.0',
+        'werkzeug>=2.0.0',
     ],
     entry_points={
         'console_scripts': [
             'skt-dl=skt_dl.cli:main',
+            'skt-dl-web=skt_dl.web:run_app',  # Web interface entry point
         ],
     },
     classifiers=[
@@ -37,10 +43,16 @@ setup(
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
         'Topic :: Multimedia :: Video',
         'Topic :: Internet',
     ],
     python_requires='>=3.8',
-    keywords='youtube downloader video playlist',
+    keywords='youtube downloader video playlist subtitle thumbnail concurrent',
     license='MIT',
+    project_urls={
+        'Documentation': 'https://github.com/example/skt-dl',
+        'Source': 'https://github.com/example/skt-dl',
+        'Tracker': 'https://github.com/example/skt-dl/issues',
+    },
 )

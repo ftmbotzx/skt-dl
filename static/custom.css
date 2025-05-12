@@ -1,0 +1,51 @@
+/* Custom CSS for skt-dl web interface */
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+.card {
+    margin-bottom: 1.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.card-header {
+    font-weight: bold;
+}
+
+.progress {
+    height: 1.5rem;
+    margin: 1rem 0;
+}
+
+.progress-bar {
+    font-weight: bold;
+    font-size: 0.85rem;
+}
+
+.list-group-item {
+    transition: background-color 0.3s;
+}
+
+.list-group-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.form-check {
+    margin-bottom: 0.5rem;
+}
+
+footer {
+    margin-top: 3rem;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+}

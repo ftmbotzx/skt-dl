@@ -1,0 +1,5 @@
+include README.md
+include LICENSE
+include MANIFEST.in
+recursive-include templates *.html
+recursive-include static *.css *.js *.png *.ico

@@ -17,8 +17,15 @@ A lightweight, pure Python library and command-line tool for downloading YouTube
 
 ## Installation
 
+You can install skt-dl directly from PyPI:
+
 ```bash
-# Install from source
+pip install skt-dl
+```
+
+Or install from the source code:
+
+```bash
 git clone https://github.com/username/skt-dl.git
 cd skt-dl
 pip install -e .
@@ -151,10 +158,39 @@ For improved reliability, skt-dl can use the YouTube Data API v3:
 export YOUTUBE_API_KEY="your-api-key"
 ```
 
+## Web Interface
+
+skt-dl also comes with a web interface for those who prefer a graphical interface over command-line tools.
+
+To start the web interface:
+
+```bash
+skt-dl-web
+```
+
+This will launch a local web server on http://localhost:5000 where you can:
+
+- Download videos and playlists
+- Search YouTube
+- Extract video information
+- Download subtitles and thumbnails
+- Use concurrent processing for playlists
+
+### Web Interface Configuration
+
+You can configure the web interface using environment variables:
+
+- `SKT_DL_DOWNLOAD_DIR`: Directory where downloads are saved (default: ~/skt-dl-downloads)
+- `PORT`: Port to run the web server on (default: 5000)
+- `SKT_DL_PRODUCTION`: Set to "true" to run in production mode
+- `SESSION_SECRET`: Secret key for Flask sessions
+
 ## Requirements
 
 - Python 3.8 or higher
 - requests
+- flask (for web interface)
+- gunicorn (for web interface in production)
 
 ## License
 
