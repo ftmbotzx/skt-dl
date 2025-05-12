@@ -1,0 +1,3 @@
+[console_scripts]
+skt-dl = skt_dl.cli:main
+skt-dl-web = skt_dl.web:run_app

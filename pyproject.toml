@@ -1,14 +1,53 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "repl-nix-workspace"
-version = "0.1.0"
-description = "Add your description here"
-requires-python = ">=3.11"
-dependencies = [
-    "email-validator>=2.2.0",
-    "flask>=3.1.0",
-    "flask-sqlalchemy>=3.1.1",
-    "gunicorn>=23.0.0",
-    "psycopg2-binary>=2.9.10",
-    "requests>=2.32.3",
-    "setuptools>=80.4.0",
+name = "skt-dl"
+dynamic = ["version"]
+description = "A custom YouTube video and playlist downloader"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+readme = "README.md"
+authors = [
+    {name = "skt-dl developers", email = "skt-dl@example.com"}
 ]
+keywords = ["youtube", "downloader", "video", "playlist", "subtitle", "thumbnail", "concurrent"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Internet",
+]
+dependencies = [
+    "requests>=2.25.0",
+    "flask>=2.0.0",
+    "flask-sqlalchemy>=3.0.0",
+    "gunicorn>=20.1.0",
+    "werkzeug>=2.0.0",
+    "build>=1.2.2.post1",
+    "wheel>=0.45.1",
+    "setuptools>=75.3.2",
+]
+
+[project.scripts]
+skt-dl = "skt_dl.cli:main"
+skt-dl-web = "skt_dl.web:run_app"
+
+[project.urls]
+"Documentation" = "https://github.com/example/skt-dl"
+"Source" = "https://github.com/example/skt-dl"
+"Tracker" = "https://github.com/example/skt-dl/issues"
+
+[tool.setuptools]
+packages = ["skt_dl"]
+include-package-data = true
+
+[tool.setuptools.dynamic]
+version = {attr = "skt_dl.__version__"}

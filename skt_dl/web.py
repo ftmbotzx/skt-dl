@@ -21,15 +21,14 @@ from .search import YouTubeSearch
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('skt-dl-web')
 
+# Import constants
+from .constants import DEFAULT_DOWNLOAD_DIR, TEMPLATES_DIR, STATIC_DIR
+
 # Initialize Flask app
 app = Flask(__name__, 
-           template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), '../templates'),
-           static_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), '../static'))
+           template_folder=TEMPLATES_DIR,
+           static_folder=STATIC_DIR)
 app.secret_key = os.environ.get("SESSION_SECRET", "skt-dl-secret-key")
-
-# Create download directory in user's home directory
-user_home = os.path.expanduser("~")
-DEFAULT_DOWNLOAD_DIR = os.path.join(user_home, 'skt-dl-downloads')
 
 def get_download_dir():
     """Get the download directory, creating it if it doesn't exist"""

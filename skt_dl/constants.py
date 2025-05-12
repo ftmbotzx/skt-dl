@@ -1,6 +1,8 @@
 """
 Constants used throughout the skt-dl package
 """
+import os
+from pathlib import Path
 
 # User agent to use for requests
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
@@ -16,6 +18,22 @@ DEFAULT_HEADERS = {
 YOUTUBE_BASE_URL = "https://www.youtube.com"
 YOUTUBE_WATCH_URL = f"{YOUTUBE_BASE_URL}/watch"
 YOUTUBE_PLAYLIST_URL = f"{YOUTUBE_BASE_URL}/playlist"
+
+# Package information
+PACKAGE_NAME = "skt-dl"
+PACKAGE_VERSION = "0.1.0"  # Should match __version__ in __init__.py
+
+# Default directories
+USER_HOME = os.path.expanduser("~")
+DEFAULT_DOWNLOAD_DIR = os.environ.get(
+    "SKT_DL_DOWNLOAD_DIR", 
+    os.path.join(USER_HOME, 'skt-dl-downloads')
+)
+
+# Templates directory (for web interface)
+PACKAGE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+TEMPLATES_DIR = os.path.join(PACKAGE_DIR, 'templates')
+STATIC_DIR = os.path.join(PACKAGE_DIR, 'static')
 
 # Quality mappings for easy reference
 QUALITY_LABELS = {

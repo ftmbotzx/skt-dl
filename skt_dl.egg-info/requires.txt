@@ -1,0 +1,8 @@
+requests>=2.25.0
+flask>=2.0.0
+flask-sqlalchemy>=3.0.0
+gunicorn>=20.1.0
+werkzeug>=2.0.0
+build>=1.2.2.post1
+wheel>=0.45.1
+setuptools>=75.3.2
