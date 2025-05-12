@@ -206,6 +206,10 @@ def main() -> None:
     """
     Main CLI entry point
     """
+    # Check for --version flag before parsing other arguments
+    if "--version" in sys.argv:
+        show_version()
+        
     args = parse_arguments()
     
     # Display version and exit if requested
