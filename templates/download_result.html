@@ -1,0 +1,97 @@
+{% extends "layout.html" %}
+
+{% block title %}Download Result - skt-dl{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h2 class="mb-0">Download Completed</h2>
+            </div>
+            <div class="card-body">
+                {% if result.playlist %}
+                    <h4>Playlist Download Summary</h4>
+                    <div class="my-3">
+                        <div class="progress">
+                            {% set success_percentage = (result.files|length / result.total * 100)|int %}
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ success_percentage }}%">
+                                {{ success_percentage }}%
+                            </div>
+                            {% if result.errors > 0 %}
+                                {% set error_percentage = (result.errors / result.total * 100)|int %}
+                                <div class="progress-bar bg-danger" role="progressbar" style="width: {{ error_percentage }}%">
+                                    {{ error_percentage }}%
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <p><strong>Total Videos:</strong> {{ result.total }}</p>
+                        <p><strong>Successfully Downloaded:</strong> {{ result.files|length }}</p>
+                        <p><strong>Failed:</strong> {{ result.errors }}</p>
+                    </div>
+
+                    {% if result.files %}
+                        <h5>Downloaded Files</h5>
+                        <div class="list-group mb-3">
+                            {% for file in result.files %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ file.split('/')[-1] }}
+                                    <a href="{{ url_for('download_file', filename=file.split('/')[-1]) }}" class="btn btn-sm btn-primary">
+                                        Download
+                                    </a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <h4>Downloaded Files</h4>
+                    {% if result.video_file %}
+                        <div class="list-group mb-3">
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="badge bg-primary me-2">Video</span>
+                                    {{ result.video_file.split('/')[-1] }}
+                                </div>
+                                <a href="{{ url_for('download_file', filename=result.video_file.split('/')[-1]) }}" class="btn btn-sm btn-primary">
+                                    Download
+                                </a>
+                            </div>
+                            
+                            {% if result.subtitle_file %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="badge bg-info me-2">Subtitles</span>
+                                        {{ result.subtitle_file.split('/')[-1] }}
+                                    </div>
+                                    <a href="{{ url_for('download_file', filename=result.subtitle_file.split('/')[-1]) }}" class="btn btn-sm btn-primary">
+                                        Download
+                                    </a>
+                                </div>
+                            {% endif %}
+                            
+                            {% if result.thumbnail_file %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="badge bg-warning text-dark me-2">Thumbnail</span>
+                                        {{ result.thumbnail_file.split('/')[-1] }}
+                                    </div>
+                                    <a href="{{ url_for('download_file', filename=result.thumbnail_file.split('/')[-1]) }}" class="btn btn-sm btn-primary">
+                                        Download
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endif %}
+                
+                <div class="mt-3">
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-primary">Download Another Video</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

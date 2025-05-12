@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+
+{% block title %}Search Results - skt-dl{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h2 class="mb-0">Search Results</h2>
+                <span class="badge bg-light text-dark">{{ results.item_count }} results</span>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('search_videos') }}" method="post" class="mb-4">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="query" name="query" 
+                               value="{{ query }}" required>
+                        <button class="btn btn-primary" type="submit">Search</button>
+                    </div>
+                </form>
+
+                {% if results.items %}
+                    <div class="list-group">
+                        {% for item in results.items %}
+                            <div class="list-group-item list-group-item-action">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <img src="{{ item.thumbnail_url }}" alt="{{ item.title }}" class="img-fluid">
+                                    </div>
+                                    <div class="col-md-9">
+                                        <h5 class="mb-1">{{ item.title }}</h5>
+                                        <p class="mb-1 text-muted">{{ item.channel_name }}</p>
+                                        <p class="mb-1">{{ item.description[:150] }}{% if item.description|length > 150 %}...{% endif %}</p>
+                                        <div class="d-flex mt-2">
+                                            <form action="{{ url_for('extract_info') }}" method="post" class="me-2">
+                                                <input type="hidden" name="url" value="{{ item.url }}">
+                                                <button type="submit" class="btn btn-success btn-sm">Download</button>
+                                            </form>
+                                            <a href="{{ item.url }}" target="_blank" class="btn btn-outline-secondary btn-sm">View on YouTube</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    {% if results.next_page_token %}
+                    <div class="mt-3 text-center">
+                        <form action="{{ url_for('search_videos') }}" method="post">
+                            <input type="hidden" name="query" value="{{ query }}">
+                            <input type="hidden" name="page_token" value="{{ results.next_page_token }}">
+                            <button type="submit" class="btn btn-outline-primary">Load More Results</button>
+                        </form>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <div class="alert alert-info">
+                        No results found for "{{ query }}". Try different search terms.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -6,11 +6,14 @@ A lightweight, pure Python library and command-line tool for downloading YouTube
 
 - Download YouTube videos in various qualities (144p to 4K)
 - Download audio-only streams (MP3, AAC, Opus)
-- Download playlists
+- Download playlists with sequential or concurrent processing
 - Search YouTube videos, channels, and playlists
-- Extract video information
+- Extract video information with advanced metadata
+- Download video subtitles/captions in various formats (SRT, VTT, JSON, XML)
+- Download video thumbnails in various qualities
 - Support for multiple format types (MP4, WebM)
 - Support for multiple codecs (H.264, VP9, AV1)
+- Enhanced progress tracking with terminal-aware display
 
 ## Installation
 
@@ -47,6 +50,24 @@ skt-dl download https://www.youtube.com/watch?v=dQw4w9WgXcQ -q itag:251
 # Download a playlist
 skt-dl download https://www.youtube.com/playlist?list=PLexamplelist
 
+# Download a playlist with concurrent processing
+skt-dl download https://www.youtube.com/playlist?list=PLexamplelist --concurrent --max-workers 4
+
+# Download video with subtitles
+skt-dl download https://www.youtube.com/watch?v=dQw4w9WgXcQ --with-subtitles
+
+# Download only subtitles
+skt-dl subtitle https://www.youtube.com/watch?v=dQw4w9WgXcQ -l en --format srt
+
+# List available subtitle languages
+skt-dl subtitle https://www.youtube.com/watch?v=dQw4w9WgXcQ --list
+
+# Download video thumbnail
+skt-dl thumbnail https://www.youtube.com/watch?v=dQw4w9WgXcQ -q high
+
+# Download all thumbnail qualities
+skt-dl thumbnail https://www.youtube.com/watch?v=dQw4w9WgXcQ --all
+
 # Get video information
 skt-dl info https://www.youtube.com/watch?v=dQw4w9WgXcQ
 
@@ -60,7 +81,7 @@ skt-dl search "python tutorial" --download
 ### Python Module Usage
 
 ```python
-# Import the package
+# Basic video download
 from skt_dl import YouTubeAPIExtractor, VideoDownloader
 
 # Create extractor and downloader
@@ -75,6 +96,48 @@ output_file = downloader.download_video(
     quality="720p"
 )
 print(f"Downloaded to: {output_file}")
+
+# Search for videos
+from skt_dl import YouTubeSearch
+
+search = YouTubeSearch()
+results = search.search_videos("python tutorial", max_results=5)
+for video in results['items']:
+    print(f"{video['title']} - {video['url']}")
+
+# Download subtitles
+from skt_dl import SubtitleDownloader
+
+subtitle_downloader = SubtitleDownloader(extractor)
+subtitle_file = subtitle_downloader.download_subtitle(
+    video_url=video_url,
+    language_code="en",
+    output_path="downloads",
+    format="srt"
+)
+print(f"Subtitles downloaded to: {subtitle_file}")
+
+# Download thumbnails
+from skt_dl import ThumbnailDownloader
+
+thumbnail_downloader = ThumbnailDownloader(extractor)
+thumbnail_file = thumbnail_downloader.download_thumbnail(
+    video_url=video_url,
+    output_path="downloads",
+    quality="high"
+)
+print(f"Thumbnail downloaded to: {thumbnail_file}")
+
+# Concurrent playlist download
+from skt_dl import ConcurrentDownloader
+
+concurrent_downloader = ConcurrentDownloader(max_workers=4)
+downloaded_files, errors = concurrent_downloader.download_playlist(
+    playlist_url="https://www.youtube.com/playlist?list=PLexamplelist",
+    output_path="downloads",
+    quality="720p"
+)
+print(f"Downloaded {len(downloaded_files)} videos")
 ```
 
 ## API Key (Optional)

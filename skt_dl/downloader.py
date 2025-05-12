@@ -152,11 +152,15 @@ class VideoDownloader:
         playlist_info = self.extractor.extract_playlist_videos(playlist_url)
         
         # Create playlist directory
-        playlist_title = safe_filename(playlist_info["title"])
+        playlist_title = safe_filename(playlist_info.get("title", "playlist") if isinstance(playlist_info, dict) else "playlist")
         playlist_dir = os.path.join(output_path, playlist_title)
         os.makedirs(playlist_dir, exist_ok=True)
         
-        videos = playlist_info["videos"]
+        # Get videos list
+        if isinstance(playlist_info, dict):
+            videos = playlist_info.get("videos", [])
+        else:
+            videos = []
         total_videos = len(videos)
         downloaded_files = []
         
@@ -173,11 +177,17 @@ class VideoDownloader:
                 # Create a wrapped progress callback that includes playlist progress
                 wrapped_callback = None
                 if progress_callback:
-                    def wrapped_callback(bytes_downloaded, total_bytes, elapsed):
+                    # Define a function that adapts the parameters
+                    def wrapped_cb(bytes_downloaded, total_bytes, elapsed):
                         progress_callback(
-                            i, total_videos, video_title, 
-                            bytes_downloaded, total_bytes, elapsed
+                            bytes_downloaded,
+                            total_bytes,
+                            elapsed,
+                            i,
+                            total_videos,
+                            video_title
                         )
+                    wrapped_callback = wrapped_cb
                 
                 # Download the video
                 file_path = self.download_video(

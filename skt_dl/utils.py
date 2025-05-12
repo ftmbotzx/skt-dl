@@ -95,12 +95,16 @@ def format_filesize(bytes_: int) -> str:
     Returns:
         Human-readable file size string
     """
+    size_float = float(bytes_)
     for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
-        if bytes_ < 1024 or unit == 'TB':
+        if size_float < 1024 or unit == 'TB':
             if unit == 'B':
-                return f"{bytes_} {unit}"
-            return f"{bytes_:.2f} {unit}"
-        bytes_ /= 1024
+                return f"{int(size_float)} {unit}"
+            return f"{size_float:.2f} {unit}"
+        size_float /= 1024
+    
+    # Fallback return for type checking (should never reach here)
+    return f"{bytes_} B"
 
 
 def calculate_eta(start_time: float, downloaded: int, total: int) -> str:
@@ -186,18 +190,42 @@ def parse_playlist_id(url: str) -> str:
     return query_params['list'][0]
 
 
-def create_progress_bar(current: int, total: int, width: int = 50) -> str:
+def get_terminal_size() -> Tuple[int, int]:
+    """
+    Get the terminal size for better progress bars
+    
+    Returns:
+        Tuple of (columns, lines)
+    """
+    try:
+        import shutil
+        return shutil.get_terminal_size()
+    except (ImportError, AttributeError):
+        try:
+            import os
+            size = os.get_terminal_size()
+            return (size.columns, size.lines)
+        except (ImportError, AttributeError):
+            pass
+    return (80, 24)  # Default fallback size
+
+def create_progress_bar(current: int, total: int, width: int = 0) -> str:
     """
     Create a text-based progress bar.
     
     Args:
         current: Current progress
         total: Total value
-        width: Width of the progress bar in characters
+        width: Width of the progress bar in characters. If 0, auto-detect terminal width.
         
     Returns:
         Progress bar as a string
     """
+    if width <= 0:
+        # Auto-detect terminal width and use 2/3 of it for the progress bar
+        term_width, _ = get_terminal_size()
+        width = max(20, int(term_width * 2 / 3))
+    
     if total == 0:
         progress = 1.0
     else:

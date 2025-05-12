@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+
+{% block title %}skt-dl YouTube Downloader{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2 class="mb-0">YouTube Downloader</h2>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('extract_info') }}" method="post">
+                    <div class="mb-3">
+                        <label for="url" class="form-label">YouTube URL</label>
+                        <input type="url" class="form-control" id="url" name="url" 
+                               placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ" required>
+                        <div class="form-text text-muted">
+                            Enter the URL of a YouTube video or playlist
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Get Information</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header bg-info text-white">
+                <h3 class="mb-0">Features</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5><i class="bi bi-download"></i> Video Download</h5>
+                        <p>Download videos in various formats and qualities (up to 4K)</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5><i class="bi bi-music-note"></i> Audio Only</h5>
+                        <p>Extract audio from videos in MP3, AAC, or Opus formats</p>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <h5><i class="bi bi-list-ol"></i> Playlist Support</h5>
+                        <p>Download entire playlists with concurrent processing</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5><i class="bi bi-card-image"></i> Thumbnail Download</h5>
+                        <p>Extract video thumbnails in various qualities</p>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <h5><i class="bi bi-subtitle"></i> Subtitle Download</h5>
+                        <p>Download video captions/subtitles in multiple formats</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5><i class="bi bi-search"></i> YouTube Search</h5>
+                        <p>Search for videos, channels, and playlists</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -11,6 +11,9 @@ from .extractor import YouTubeExtractor
 from .api_extractor import YouTubeAPIExtractor
 from .downloader import VideoDownloader
 from .search import YouTubeSearch
+from .captions import SubtitleDownloader
+from .thumbnail import ThumbnailDownloader
+from .concurrent import ConcurrentDownloader
 from .exceptions import (
     ExtractionError,
     DownloadError,
@@ -24,6 +27,9 @@ __all__ = [
     'YouTubeAPIExtractor',
     'VideoDownloader',
     'YouTubeSearch',
+    'SubtitleDownloader',
+    'ThumbnailDownloader',
+    'ConcurrentDownloader',
     'ExtractionError',
     'DownloadError',
     'RateLimitError',

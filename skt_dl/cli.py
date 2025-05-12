@@ -14,6 +14,9 @@ from . import __version__
 from .api_extractor import YouTubeAPIExtractor
 from .downloader import VideoDownloader, default_progress_callback
 from .search import YouTubeSearch
+from .captions import SubtitleDownloader
+from .thumbnail import ThumbnailDownloader
+from .concurrent import ConcurrentDownloader
 from .exceptions import (
     ExtractionError,
     DownloadError,
@@ -56,6 +59,16 @@ def parse_arguments() -> argparse.Namespace:
     download_parser.add_argument('--video-only', action='store_true', help='Download video only (no audio)')
     download_parser.add_argument('--format', choices=['mp4', 'webm'], help='Preferred format (mp4 or webm)')
     download_parser.add_argument('--list-formats', action='store_true', help='List available formats instead of downloading')
+    download_parser.add_argument('--with-subtitles', action='store_true', help='Download subtitles along with the video')
+    download_parser.add_argument('--subtitles-only', action='store_true', help='Download only the subtitles')
+    download_parser.add_argument('--subtitle-lang', default='en', help='Language code for subtitles (e.g., en, es, fr)')
+    download_parser.add_argument('--subtitle-format', choices=['srt', 'vtt', 'json', 'xml'], default='srt', help='Subtitle format')
+    download_parser.add_argument('--with-thumbnail', action='store_true', help='Download thumbnail along with the video')
+    download_parser.add_argument('--thumbnail-only', action='store_true', help='Download only the thumbnail')
+    download_parser.add_argument('--thumbnail-quality', choices=['maxres', 'high', 'medium', 'standard', 'default'], default='high', help='Thumbnail quality')
+    download_parser.add_argument('--all-thumbnails', action='store_true', help='Download all available thumbnail qualities')
+    download_parser.add_argument('--concurrent', action='store_true', help='Use concurrent downloads for playlists')
+    download_parser.add_argument('--max-workers', type=int, default=4, help='Maximum number of concurrent download workers (1-16)')
     
     # Search command
     search_parser = subparsers.add_parser('search', help='Search for YouTube videos, channels, or playlists')
@@ -70,6 +83,23 @@ def parse_arguments() -> argparse.Namespace:
     # Info command
     info_parser = subparsers.add_parser('info', help='Get information about a video or playlist')
     info_parser.add_argument('url', help='YouTube URL to get information about')
+    
+    # Subtitle command
+    subtitle_parser = subparsers.add_parser('subtitle', help='Download video subtitles')
+    subtitle_parser.add_argument('url', help='YouTube URL to download subtitles from')
+    subtitle_parser.add_argument('-o', '--output', default='.', help='Output directory')
+    subtitle_parser.add_argument('-f', '--filename', help='Custom filename (without extension)')
+    subtitle_parser.add_argument('-l', '--language', default='en', help='Language code (e.g., en, es, fr)')
+    subtitle_parser.add_argument('--format', choices=['srt', 'vtt', 'json', 'xml'], default='srt', help='Subtitle format')
+    subtitle_parser.add_argument('--list', action='store_true', help='List available subtitle languages')
+    
+    # Thumbnail command
+    thumbnail_parser = subparsers.add_parser('thumbnail', help='Download video thumbnails')
+    thumbnail_parser.add_argument('url', help='YouTube URL to download thumbnail from')
+    thumbnail_parser.add_argument('-o', '--output', default='.', help='Output directory')
+    thumbnail_parser.add_argument('-f', '--filename', help='Custom filename (without extension)')
+    thumbnail_parser.add_argument('-q', '--quality', choices=['maxres', 'high', 'medium', 'standard', 'default'], default='high', help='Thumbnail quality')
+    thumbnail_parser.add_argument('--all', action='store_true', help='Download all available thumbnail qualities')
     
     args = parser.parse_args()
     
@@ -260,10 +290,9 @@ def download_playlist(args: argparse.Namespace) -> None:
     Args:
         args: Parsed command-line arguments
     """
-    # Create extractor and downloader
     try:
+        # Create extractor
         extractor = YouTubeAPIExtractor()
-        downloader = VideoDownloader(extractor)
         
         # Get playlist info first
         print(f"Fetching playlist info: {args.url}")
@@ -276,30 +305,7 @@ def download_playlist(args: argparse.Namespace) -> None:
         if choice.lower() != 'y':
             print("Download canceled")
             return
-            
-        # Download the playlist
-        print(f"Downloading playlist: {playlist_info['title']}")
         
-        # Define progress callback for playlists
-        def playlist_progress_callback(
-            bytes_downloaded: int,
-            total_bytes: int,
-            elapsed: float,
-            file_index: int = 1,
-            total_files: int = 1,
-            current_title: str = ""
-        ) -> None:
-            """Custom progress callback for playlists"""
-            # Call the default progress callback
-            default_progress_callback(
-                bytes_downloaded,
-                total_bytes,
-                elapsed,
-                file_index,
-                total_files,
-                current_title
-            )
-            
         # Determine quality settings based on command-line args
         quality = args.quality
         if args.audio_only:
@@ -309,16 +315,90 @@ def download_playlist(args: argparse.Namespace) -> None:
             
         if args.format:
             quality = f"{quality}:{args.format}"
-            
-        output_files = downloader.download_playlist(
-            args.url,
-            output_path=args.output,
-            quality=quality,
-            progress_callback=playlist_progress_callback
-        )
         
-        print(f"\nPlaylist downloaded successfully")
-        print(f"Downloaded {len(output_files)} videos to: {args.output}")
+        # Check if concurrent download is enabled
+        if hasattr(args, 'concurrent') and args.concurrent:
+            # Use concurrent downloader
+            print(f"Downloading playlist: {playlist_info['title']} (concurrent with {args.max_workers} workers)")
+            
+            # Validate and limit max_workers
+            max_workers = min(max(1, args.max_workers), 16)
+            
+            # Create a concurrent downloader
+            concurrent_downloader = ConcurrentDownloader(max_workers=max_workers, extractor=extractor)
+            
+            # Define progress callback for concurrent downloads
+            def concurrent_progress_callback(
+                bytes_downloaded: int,
+                total_bytes: int,
+                elapsed: float,
+                file_index: int = 1,
+                total_files: int = 1,
+                current_title: str = ""
+            ) -> None:
+                # Call the default progress callback
+                default_progress_callback(
+                    bytes_downloaded,
+                    total_bytes,
+                    elapsed,
+                    file_index,
+                    total_files,
+                    current_title
+                )
+            
+            # Download the playlist concurrently
+            downloaded_files, errors = concurrent_downloader.download_playlist(
+                playlist_url=args.url,
+                output_path=args.output,
+                quality=quality,
+                progress_callback=concurrent_progress_callback
+            )
+            
+            # Print results
+            print(f"\nPlaylist download completed:")
+            print(f"  Downloaded: {len(downloaded_files)} videos")
+            print(f"  Failed: {len(errors)} videos")
+            
+            if errors:
+                print("\nFailed videos:")
+                for error in errors:
+                    print(f"  {error['index']}. {error['title']}: {error['error']}")
+            
+        else:
+            # Use sequential downloader
+            print(f"Downloading playlist: {playlist_info['title']} (sequential)")
+            
+            downloader = VideoDownloader(extractor)
+            
+            # Define progress callback for playlists
+            def playlist_progress_callback(
+                bytes_downloaded: int,
+                total_bytes: int,
+                elapsed: float,
+                file_index: int = 1,
+                total_files: int = 1,
+                current_title: str = ""
+            ) -> None:
+                """Custom progress callback for playlists"""
+                # Call the default progress callback
+                default_progress_callback(
+                    bytes_downloaded,
+                    total_bytes,
+                    elapsed,
+                    file_index,
+                    total_files,
+                    current_title
+                )
+                
+            output_files = downloader.download_playlist(
+                args.url,
+                output_path=args.output,
+                quality=quality,
+                progress_callback=playlist_progress_callback
+            )
+            
+            print(f"\nPlaylist downloaded successfully")
+            print(f"Downloaded {len(output_files)} videos to: {args.output}")
         
     except PlaylistUnavailableError as e:
         print(f"Error: Playlist unavailable - {str(e)}")
@@ -515,6 +595,105 @@ def guess_command_type(url: str) -> str:
     else:
         return 'video'
 
+def download_subtitles(args: argparse.Namespace) -> None:
+    """
+    Download subtitles for a video
+    
+    Args:
+        args: Parsed command-line arguments
+    """
+    try:
+        # Create API extractor and subtitle downloader
+        api_extractor = YouTubeAPIExtractor()
+        subtitle_downloader = SubtitleDownloader(api_extractor)
+        
+        # List available subtitles if requested
+        if args.list:
+            print(f"Listing available subtitles for: {args.url}")
+            available_captions = subtitle_downloader.list_available_captions(args.url)
+            
+            if not available_captions:
+                print("No subtitles available for this video.")
+                return
+                
+            print(f"\nFound {len(available_captions)} subtitle tracks:")
+            for i, caption in enumerate(available_captions):
+                auto_gen = " (auto-generated)" if caption.get("is_auto_generated") else ""
+                translatable = " (translatable)" if caption.get("is_translatable") else ""
+                print(f"{i+1}. {caption.get('name')} ({caption.get('language_code')}){auto_gen}{translatable}")
+                
+            return
+        
+        # Download the subtitles
+        print(f"Downloading {args.language} subtitles for: {args.url}")
+        
+        output_file = subtitle_downloader.download_subtitle(
+            video_url=args.url,
+            language_code=args.language,
+            output_path=args.output,
+            filename=args.filename,
+            format=args.format
+        )
+        
+        if output_file:
+            print(f"\nSubtitles downloaded successfully to: {output_file}")
+        else:
+            print(f"\nNo {args.language} subtitles available for this video.")
+            print("Use '--list' to see available subtitle languages.")
+            
+    except ExtractionError as e:
+        print(f"Error: {str(e)}")
+        sys.exit(1)
+    except KeyboardInterrupt:
+        print("\nDownload canceled by user")
+        sys.exit(1)
+
+def download_thumbnails(args: argparse.Namespace) -> None:
+    """
+    Download thumbnails for a video
+    
+    Args:
+        args: Parsed command-line arguments
+    """
+    try:
+        # Create API extractor and thumbnail downloader
+        api_extractor = YouTubeAPIExtractor()
+        thumbnail_downloader = ThumbnailDownloader(api_extractor)
+        
+        if args.all:
+            # Download all thumbnail qualities
+            print(f"Downloading all thumbnail qualities for: {args.url}")
+            
+            output_files = thumbnail_downloader.download_all_thumbnails(
+                video_url=args.url,
+                output_path=args.output,
+                filename=args.filename
+            )
+            
+            print(f"\nDownloaded {len(output_files)} thumbnails:")
+            for quality, path in output_files.items():
+                print(f"  {quality}: {path}")
+                
+        else:
+            # Download specific quality
+            print(f"Downloading {args.quality} thumbnail for: {args.url}")
+            
+            output_file = thumbnail_downloader.download_thumbnail(
+                video_url=args.url,
+                output_path=args.output,
+                quality=args.quality,
+                filename=args.filename
+            )
+            
+            print(f"\nThumbnail downloaded successfully to: {output_file}")
+            
+    except (ExtractionError, DownloadError) as e:
+        print(f"Error: {str(e)}")
+        sys.exit(1)
+    except KeyboardInterrupt:
+        print("\nDownload canceled by user")
+        sys.exit(1)
+
 def main() -> None:
     """
     Main CLI entry point
@@ -533,11 +712,66 @@ def main() -> None:
     # Execute the appropriate command
     if hasattr(args, 'command') and args.command:
         if args.command == 'download':
+            # Check for subtitle-only or thumbnail-only flags
+            if args.subtitles_only:
+                # Create temporary args for subtitle command
+                subtitle_args = argparse.Namespace(
+                    url=args.url,
+                    output=args.output,
+                    filename=args.filename,
+                    language=args.subtitle_lang,
+                    format=args.subtitle_format,
+                    list=False
+                )
+                download_subtitles(subtitle_args)
+                return
+                
+            elif args.thumbnail_only:
+                # Create temporary args for thumbnail command
+                thumbnail_args = argparse.Namespace(
+                    url=args.url,
+                    output=args.output,
+                    filename=args.filename,
+                    quality=args.thumbnail_quality,
+                    all=args.all_thumbnails
+                )
+                download_thumbnails(thumbnail_args)
+                return
+                
+            # Normal video download with potential extras
             download_video(args)
+            
+            # Download subtitles if requested
+            if args.with_subtitles:
+                subtitle_args = argparse.Namespace(
+                    url=args.url,
+                    output=args.output,
+                    filename=args.filename,
+                    language=args.subtitle_lang,
+                    format=args.subtitle_format,
+                    list=False
+                )
+                download_subtitles(subtitle_args)
+                
+            # Download thumbnail if requested
+            if args.with_thumbnail:
+                thumbnail_args = argparse.Namespace(
+                    url=args.url,
+                    output=args.output,
+                    filename=args.filename,
+                    quality=args.thumbnail_quality,
+                    all=args.all_thumbnails
+                )
+                download_thumbnails(thumbnail_args)
+                
         elif args.command == 'search':
             search_youtube(args)
         elif args.command == 'info':
             get_video_info(args)
+        elif args.command == 'subtitle':
+            download_subtitles(args)
+        elif args.command == 'thumbnail':
+            download_thumbnails(args)
     else:
         # No command specified
         if len(sys.argv) <= 1 or (hasattr(args, 'version') and args.version):
