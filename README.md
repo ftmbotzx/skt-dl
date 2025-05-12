@@ -17,21 +17,23 @@ A lightweight, pure Python library and command-line tool for downloading YouTube
 
 ## Installation
 
-You can install skt-dl directly from PyPI:
+You can install skt-dl directly from GitHub:
 
 ```bash
-pip install skt-dl
+pip install git+https://github.com/example/skt-dl.git
 ```
 
 Or install from the source code:
 
 ```bash
-git clone https://github.com/username/skt-dl.git
+git clone https://github.com/example/skt-dl.git
 cd skt-dl
 pip install -e .
 ```
 
-For detailed instructions on building, installing, and deploying the package, see [DEPLOYMENT.md](DEPLOYMENT.md).
+For detailed installation instructions, see [INSTALL.md](INSTALL.md).
+
+For instructions on building and deploying the package, see [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ## Usage
 
