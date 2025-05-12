@@ -14,6 +14,7 @@ A lightweight, pure Python library and command-line tool for downloading YouTube
 - Support for multiple format types (MP4, WebM)
 - Support for multiple codecs (H.264, VP9, AV1)
 - Enhanced progress tracking with terminal-aware display
+- Compatibility layer with youtube-dl/yt-dlp via `YoutubeDL` class
 
 ## Installation
 

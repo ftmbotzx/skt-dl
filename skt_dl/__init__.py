@@ -21,6 +21,7 @@ from .exceptions import (
     VideoUnavailableError,
     PlaylistUnavailableError
 )
+from .compat import YoutubeDL
 
 __all__ = [
     'YouTubeExtractor',
@@ -30,6 +31,7 @@ __all__ = [
     'SubtitleDownloader',
     'ThumbnailDownloader',
     'ConcurrentDownloader',
+    'YoutubeDL',  # Compatibility with youtube-dl/yt-dlp
     'ExtractionError',
     'DownloadError',
     'RateLimitError',
