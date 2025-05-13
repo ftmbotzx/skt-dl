@@ -604,7 +604,7 @@ class YouTubeAPIExtractor:
         if not quality and has_audio and not has_video:
             # For audio-only formats
             audio_bitrate = fmt_data.get('bitrate', 0)
-            if audio_bitrate:
+            if audio_bitrate and audio_bitrate is not None:
                 audio_bitrate_kbps = int(audio_bitrate / 1000)
                 quality = f"{audio_bitrate_kbps}kbps"
         
@@ -615,13 +615,16 @@ class YouTubeAPIExtractor:
         audio_bitrate = 0
         video_bitrate = 0
         bitrate = fmt_data.get('bitrate', 0)
-        
+
+        # Ensure bitrate is never None 
+        if bitrate is None:
+            bitrate = 0
         if has_audio and not has_video:
             audio_bitrate = bitrate
         elif has_video and not has_audio:
             video_bitrate = bitrate
-        elif has_audio and has_video:
-            # For combined formats, estimate the split
+        elif has_audio and has_video and bitrate > 0:    
+           # For combined formats, estimate the split
             # Typical audio is ~128kbps, so the rest is video
             audio_bitrate = min(128000, int(bitrate * 0.1))
             video_bitrate = bitrate - audio_bitrate
